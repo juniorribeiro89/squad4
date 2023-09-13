@@ -1,0 +1,41 @@
+version: '3'
+services:
+  myapp:
+    build:
+      context: ./app-python
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - ./app-python:/app
+    depends_on:
+      - mongo
+      - postgres
+    networks:
+      - mynetwork
+
+  mongo:
+    image: mongo:latest
+    container_name: mongodb-etl
+    ports:
+      -27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: examplepassword
+    volumes:
+      - ./mongo-init/init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - mynetwork
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-etl
+    environment:
+      POSTGRES_DB: my_database_etl
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: examplepassword
+    ports:
+      - "5432:5432"  # Mapeie a porta do PostgreSQL, se necessário
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
